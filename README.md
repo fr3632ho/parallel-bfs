@@ -1,10 +1,25 @@
 # parallel-bfs
 
-This is the parallel-bfs project.
+Parallel BFS project. This project is intended to illustrate a possible approach of parallelizing the _Breadth-First Search_ algorithm using _pennants_.
 
 # Building and installing
 
-See the [BUILDING](BUILDING.md) document.
+Build the project by navigating to root and using the following commands
+
+```
+$ cmake --preset=dev
+$ cmake --build --preset=dev
+
+```
+
+### Tests
+
+Test coverage is implemented for the `bag`, `pennant` and various `bfs` implementations in the repository.
+To run the test after building you can use the following command
+
+```
+$ ctest --preset=dev
+```
 
 # Contributing
 

@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/parallel-bfs_test.dir/source/parallel-bfs_test.o -o parallel-bfs_test  -lparallel-bfs_lib 

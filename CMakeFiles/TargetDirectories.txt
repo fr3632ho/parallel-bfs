@@ -1,0 +1,4 @@
+/home/fredrik/workbench/parallel-bfs/CMakeFiles/parallel-bfs_test.dir
+/home/fredrik/workbench/parallel-bfs/CMakeFiles/bag_test.dir
+/home/fredrik/workbench/parallel-bfs/CMakeFiles/edit_cache.dir
+/home/fredrik/workbench/parallel-bfs/CMakeFiles/rebuild_cache.dir
