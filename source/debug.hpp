@@ -4,6 +4,11 @@
 #include <iterator>
 #include <utility>
 
+#define LOGF(...) \
+  do { \
+    fprintf(stderr, __VA_ARGS__); \
+  } while (0)
+
 void LOG()
 {
   std::cout << std::endl;
