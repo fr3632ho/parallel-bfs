@@ -2,6 +2,9 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstddef>
+#include <iostream>
+#include <iterator>
 #include <vector>
 
 typedef struct bag_t bag_t;
@@ -25,6 +28,7 @@ private:
   auto insert(node_t*, node_t*) -> node_t*;
   auto display_inorder(node_t* root, int depth) -> void;
   auto clear_pennant(node_t*) -> void;
+  auto empty() -> bool;
 
   static auto get_elements(node_t* node, std::vector<int>* elements) -> void
   {
@@ -37,6 +41,82 @@ private:
   }
 
 public:
+  struct Iterator
+  {
+    using iterator_category = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = int;
+    using pointer = node_t*;
+    using pointer_data = int*;
+    using reference = int&;
+
+    Iterator(pointer root)
+        : current {root}
+        , right_most {nullptr}
+    {
+      ptr = next();
+    }
+
+    reference operator*() { return ptr->data; }
+    pointer_data operator->() { return &ptr->data; }
+
+    Iterator& operator++()
+    {
+      ptr = next();
+      return *this;
+    }
+    Iterator operator++(int)
+    {
+      Iterator temp = *this;
+      ptr = next();
+      return temp;
+    }
+    friend bool operator==(const Iterator& a, const Iterator& b)
+    {
+      return a.ptr == b.ptr;
+    }
+    friend bool operator!=(const Iterator& a, const Iterator& b)
+    {
+      return a.ptr != b.ptr;
+    }
+
+  private:
+    pointer next()
+    {
+      if (current == nullptr) {
+        return nullptr;
+      }
+
+      pointer temp;
+      if (current->left == nullptr) {
+        temp = current;
+        current = current->right;
+        return temp;
+      }
+
+      right_most = current->left;
+      while (right_most->right != nullptr && right_most->right != current) {
+        right_most = right_most->right;
+      }
+
+      if (right_most->right == NULL) {
+        right_most->right = current;
+        current = current->left;
+      } else {
+        right_most->right = nullptr;
+        temp = current;
+        current = current->right;
+        return temp;
+      }
+      return next();
+    }
+
+    pointer start, ptr, current, right_most;
+  };
+
+  Iterator begin() { return Iterator(root); }
+  Iterator end() { return Iterator(nullptr); }
+
   size_t size;
 
   pennant_t()
@@ -140,8 +220,9 @@ struct bag_t
    * vertices needs to be a positive integer > 0
    */
   bag_t(size_t vertices)
+      : size {static_cast<size_t>(log2(vertices) + 1)}
+      , number_of_elements {0}
   {
-    size = static_cast<size_t>(log2(vertices) + 1);
     arr = new pennant_t*[size];
   }
 
@@ -166,8 +247,27 @@ struct bag_t
     return count;
   }
 
+  auto empty() -> bool;
+
+  struct Iterator
+  {
+    using iterator_type = std::forward_iterator_tag;
+    using difference_type = std::ptrdiff_t;
+    using value_type = int;
+    using pointer_data = int*;
+    using reference = int&;
+    using pointer = pennant_t*;
+    using pennant_pointer = pennant_t::Iterator;
+
+    Iterator(pointer bag_start);
+
+  private:
+    pointer current;
+  };
+
   /* Variables */
   size_t size;
+  size_t number_of_elements;
   pennant_t** arr;
 };
 

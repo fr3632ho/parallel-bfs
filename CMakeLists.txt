@@ -15,27 +15,15 @@ include(cmake/variables.cmake)
 
 # ---- Declare library ----
 
-add_library(
-    parallel-bfs_lib OBJECT
-    source/lib.cpp
-)
-target_include_directories(
-    parallel-bfs_lib ${warning_guard}
-    PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
-)
-
-add_library(
-    parallel-bfs-test OBJECT
-    source/graph.cpp
-)
-
-target_include_directories(
-    parallel-bfs-test ${warning_guard}
-    PUBLIC
-    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
-)
-
+# add_library(
+#     parallel-bfs_lib OBJECT
+#     source/lib.cpp
+# )
+# target_include_directories(
+#     parallel-bfs_lib ${warning_guard}
+#     PUBLIC
+#     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
+# )
 add_library(bag-lib OBJECT source/bag.cpp)
 
 target_include_directories(
@@ -44,18 +32,32 @@ target_include_directories(
     "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
 )
 
+add_library(
+    parallel-bfs-test OBJECT
+    source/graph.cpp
+    source/bag.cpp
+)
+
+target_include_directories(
+    parallel-bfs-test ${warning_guard}
+    PUBLIC
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/source>"
+)
+
+
+
 # target_compile_features(parallel-bfs_lib PUBLIC cxx_std_17)
 
-# ---- Declare executable ----
+# ---- KEEP THESE ----
 
-add_executable(parallel-bfs_exe source/main.cpp)
-add_executable(parallel-bfs::exe ALIAS parallel-bfs_exe)
+# add_executable(parallel-bfs_exe source/main.cpp)
+# add_executable(parallel-bfs::exe ALIAS parallel-bfs_exe)
 
-set_property(TARGET parallel-bfs_exe PROPERTY OUTPUT_NAME parallel-bfs)
+# set_property(TARGET parallel-bfs_exe PROPERTY OUTPUT_NAME parallel-bfs)
 
-target_compile_features(parallel-bfs_exe PRIVATE cxx_std_17)
+# target_compile_features(parallel-bfs_exe PRIVATE cxx_std_17)
 
-target_link_libraries(parallel-bfs_exe PRIVATE parallel-bfs_lib)
+# target_link_libraries(parallel-bfs_exe PRIVATE parallel-bfs_lib)
 
 # -------- Parallel BFS Test executable --------
 add_executable(parallel-bfs-test_exe source/bfs_main.cpp)

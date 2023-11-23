@@ -2,9 +2,8 @@
 #include <iomanip>
 #include <iostream>
 
-#include "bag.hpp"
-
-#include "debug.hpp"
+#include <bag.hpp>
+#include <debug.hpp>
 
 pennant_t ::~pennant_t()
 {
@@ -128,6 +127,12 @@ auto insert(bag_t* bag, int i) -> void
     bag->arr[k++] = nullptr;
   }
   bag->arr[k] = cbt;
+  bag->number_of_elements++;
+}
+
+auto bag_t::empty() -> bool
+{
+  return number_of_elements == 0;
 }
 
 auto insert_pennant(bag_t* bag, pennant_t* cbt) -> void
@@ -193,6 +198,9 @@ auto merge(bag_t* b1, bag_t* b2) -> void
         break;
     }
   }
+  // This will need to be changed
+  b1->number_of_elements += b2->number_of_elements;
+  b2->number_of_elements = 0;
 }
 
 auto create(bag_t* b1) -> void {}

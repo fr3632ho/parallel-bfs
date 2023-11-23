@@ -1,3 +1,5 @@
+#ifndef GRAPH_HPP
+#define GRAPH_HPP
 #pragma once
 
 /* Includes */
@@ -8,6 +10,7 @@
 
 constexpr int EDGE_DEGREE = 256;
 constexpr int VERTEX_DEGREE = 256;
+constexpr int INF = 1 << 29;
 
 typedef struct edge_t edge_t;
 
@@ -37,6 +40,8 @@ public:
    */
   auto BFS_linear() -> int;
   auto BFS_openmp() -> int;
+  auto BFS_bag_linear() -> int;
+  auto BFS_bag() -> int;
 
   /**
    * @brief Check if the parallel BFS implementation is correct
@@ -51,11 +56,11 @@ public:
 private:
   std::vector<std::vector<int>> adj;
   int start, v, m;
-#ifdef VERIFY
   std::vector<int> dist_linear;
   std::vector<int> dist_comp;
-#endif  // VERIFY
 };
 
 auto build_graph(Graph& graph) -> void;
 auto operator<<(std::ostream& os, const Graph& graph) -> std::ostream&;
+
+#endif  // GRAPH_HPP

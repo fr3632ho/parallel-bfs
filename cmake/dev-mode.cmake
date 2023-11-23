@@ -10,7 +10,7 @@ add_custom_target(
     COMMAND parallel-bfs_exe
     VERBATIM
 )
-add_dependencies(run-exe parallel-bfs_exe)
+add_dependencies(run-exe parallel-bfs-test_exe)
 
 option(BUILD_MCSS_DOCS "Build documentation using Doxygen and m.css" OFF)
 if(BUILD_MCSS_DOCS)

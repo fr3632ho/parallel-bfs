@@ -1,5 +1,5 @@
 install(
-    TARGETS parallel-bfs_exe
+    TARGETS parallel-bfs-test_exe
     RUNTIME COMPONENT parallel-bfs_Runtime
 )
 

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DEBUG_HPP
+#define DEBUG_HPP
 
 #include <iostream>
 #include <iterator>
@@ -35,3 +36,5 @@ inline Stream& operator<<(Stream& stream, const Vector& vect)
   stream << "]\n";
   return stream;
 }
+
+#endif  // DEBUG_HPP

@@ -5,7 +5,8 @@
 #include <unordered_set>
 #include <utility>
 
-#include <debug.hpp>
+#include <bag.hpp>
+// #include <debug.hpp>
 #include <graph.hpp>
 
 using std::cin;
@@ -49,7 +50,7 @@ auto Graph::BFS_linear() -> int
   }
 
 #ifdef VERIFY
-  cout << dist_linear << endl;
+  // cout << dist_linear << endl;
 #endif
 
   return EXIT_SUCCESS;
@@ -58,6 +59,24 @@ auto Graph::BFS_linear() -> int
 auto Graph::BFS_openmp() -> int
 {
   return 0;
+}
+
+auto Graph::BFS_bag_linear() -> int
+{
+  dist_linear.resize(V);
+  std::fill(dist_linear.begin(), dist_linear.end(), INF);
+
+  bag_t bag(V + 1);
+  insert(&bag, start);
+  while (!bag.empty()) {
+    }
+
+  return EXIT_SUCCESS;
+}
+
+auto Graph::BFS_bag() -> int
+{
+  return EXIT_SUCCESS;
 }
 
 auto build_graph(Graph& graph) -> void

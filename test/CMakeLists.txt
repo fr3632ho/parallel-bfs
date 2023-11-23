@@ -6,8 +6,8 @@ project(parallel-bfsTests LANGUAGES CXX)
 
 # ---- Tests ----
 
-add_executable(parallel-bfs_test source/parallel-bfs_test.cpp)
-target_link_libraries(parallel-bfs_test PRIVATE parallel-bfs_lib)
+# add_executable(parallel-bfs_test source/parallel-bfs_test.cpp)
+# target_link_libraries(parallel-bfs_test PRIVATE parallel-bfs_lib)
 # target_compile_features(parallel-bfs_test PRIVATE cxx_std_17)
 
 # -- bag test --
@@ -48,7 +48,16 @@ target_link_libraries(bag_split_13 PRIVATE bag-lib)
 add_executable(bag_split_1023 source/bag_split_1023.cpp)
 target_link_libraries(bag_split_1023 PRIVATE bag-lib)
 
-add_test(NAME parallel-bfs_test COMMAND parallel-bfs_test)
+add_executable(bag_merge_split_1023 source/bag_merge_split_1023.cpp)
+target_link_libraries(bag_merge_split_1023 PRIVATE bag-lib)
+
+# Iterator test
+add_executable(pennant_iterate source/pennant_iterate.cpp)
+target_link_libraries(pennant_iterate PRIVATE bag-lib)
+
+
+
+# add_test(NAME parallel-bfs_test COMMAND parallel-bfs_test)
 add_test(NAME bag_test.cpp COMMAND bag_test)
 add_test(NAME pennants_test.cpp COMMAND pennants_test)
 add_test(NAME bag_merge_6_and_3.cpp COMMAND bag_merge_6_and_3)
@@ -60,6 +69,8 @@ add_test(NAME bag_split_23.cpp COMMAND bag_split_23)
 add_test(NAME bag_split_13.cpp COMMAND bag_split_13)
 add_test(NAME bag_split_1023.cpp COMMAND bag_split_1023)
 add_test(NAME pennant_split_64.cpp COMMAND pennant_split_64)
+add_test(NAME bag_merge_split_1023.cpp COMMAND bag_merge_split_1023)
+add_test(NAME pennant_iterate.cpp COMMAND pennant_iterate)
 
 # ---- End-of-file commands ----
 
