@@ -13,3 +13,4 @@ data/graph500*
 CMakeCache.txt
 source/*.out
 source/*.o
+test/source/data/*
