@@ -1,7 +1,12 @@
 #include <iostream>
 
-#include <graph.hpp>
-#include <instrumentation.hpp>
+#ifndef LOCAL_MAKE
+#  include <graph.hpp>
+#  include <instrumentation.hpp>
+#else
+#  include "graph.hpp"
+#  include "instrumentation.hpp"
+#endif
 
 #define LINEAR
 #define OPENMP
@@ -20,5 +25,18 @@ auto main() -> int
   BENCHMARK_BEGIN(linear_bfs);
   graph.BFS_linear();
   BENCHMARK_END(linear_bfs);
+
+  BENCHMARK_BEGIN(bag_linear);
+  graph.BFS_bag_linear();
+  BENCHMARK_END(bag_linear);
+
+  BENCHMARK_BEGIN(parallel_bag);
+  graph.BFS_bag(14);
+  BENCHMARK_END(parallel_bag);
+
+  for (int i = 0; i < graph.V; i++) {
+    assert(graph.dist_linear[i] == graph.dist_comp[i]);
+  }
+  std::cout << "Done" << std::endl;
   return 0;
 }

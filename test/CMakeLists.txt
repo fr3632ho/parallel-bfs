@@ -4,6 +4,8 @@
 
 project(parallel-bfsTests LANGUAGES CXX)
 
+file(COPY source/data DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 # ---- Tests ----
 
 # add_executable(parallel-bfs_test source/parallel-bfs_test.cpp)
@@ -20,6 +22,7 @@ add_executable(pennants_test source/pennants_test.cpp)
 target_link_libraries(pennants_test PRIVATE bag-lib)
 # target_compile_features(pennants_test PRIVATE cxx_std_17)
 
+# Bag merge tests
 add_executable(bag_merge_6_and_3 source/bag_merge_6_and_3.cpp)
 target_link_libraries(bag_merge_6_and_3 PRIVATE bag-lib)
 # target_compile_features(bag_merge_6_and_3  PRIVATE cxx_std_17)
@@ -33,6 +36,7 @@ target_link_libraries(bag_merge_1023_1023 PRIVATE bag-lib)
 add_executable(bag_merge_1023_1 source/bag_merge_1023_1.cpp)
 target_link_libraries(bag_merge_1023_1 PRIVATE bag-lib)
 
+# Split tests
 add_executable(pennant_split_64 source/pennant_split_64.cpp)
 target_link_libraries(pennant_split_64 PRIVATE bag-lib)
 
@@ -48,12 +52,19 @@ target_link_libraries(bag_split_13 PRIVATE bag-lib)
 add_executable(bag_split_1023 source/bag_split_1023.cpp)
 target_link_libraries(bag_split_1023 PRIVATE bag-lib)
 
+# Merge and Split test
 add_executable(bag_merge_split_1023 source/bag_merge_split_1023.cpp)
 target_link_libraries(bag_merge_split_1023 PRIVATE bag-lib)
+
+add_executable(bag_split_many source/bag_split_many.cpp)
+target_link_libraries(bag_split_many PRIVATE bag-lib)
 
 # Iterator test
 add_executable(pennant_iterate source/pennant_iterate.cpp)
 target_link_libraries(pennant_iterate PRIVATE bag-lib)
+
+add_executable(graph_execute_linear source/graph_execute_linear.cpp)
+target_link_libraries(graph_execute_linear PRIVATE parallel-bfs-test)
 
 
 
@@ -68,9 +79,11 @@ add_test(NAME bag_split_16.cpp COMMAND bag_split_16)
 add_test(NAME bag_split_23.cpp COMMAND bag_split_23)
 add_test(NAME bag_split_13.cpp COMMAND bag_split_13)
 add_test(NAME bag_split_1023.cpp COMMAND bag_split_1023)
+add_test(NAME bag_split_many.cpp COMMAND bag_split_many)
 add_test(NAME pennant_split_64.cpp COMMAND pennant_split_64)
 add_test(NAME bag_merge_split_1023.cpp COMMAND bag_merge_split_1023)
 add_test(NAME pennant_iterate.cpp COMMAND pennant_iterate)
+add_test(NAME graph_execute_linear.cpp COMMAND graph_execute_linear)
 
 # ---- End-of-file commands ----
 

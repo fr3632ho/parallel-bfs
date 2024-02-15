@@ -1,3 +1,4 @@
+from os import write
 import sys
 
 print(sys.argv)
@@ -12,8 +13,16 @@ for line in data:
     a, b = line.split(" ")
     S.add(a), S.add(b)
 
-print(f"N={len(S)}, M={len(data)}")
+adj = [[] for i in range(len(S) + 1)]
+for line in data:
+    a, b = line.split(" ")
+    adj[int(a)].append(int(b))
 
+print(f"N={len(S)}, M={len(data)}")
+avg = sum(len(i) for i in adj)/(len(S) + 1)
+print("avg=",avg)
+
+exit(0)
 old_stdout = sys.stdout
 sys.stdout = open(out_file, 'w')
 

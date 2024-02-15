@@ -2,16 +2,159 @@
 #include <iomanip>
 #include <iostream>
 
-#include <bag.hpp>
-#include <debug.hpp>
+#ifndef LOCAL_MAKE
+#  include <bag.hpp>
+#  include <debug.hpp>
+#else
+#  include "bag.hpp"
+// #  include "debug.hpp"
+#endif
 
-pennant_t ::~pennant_t()
+thread_local std::vector<pennant_t*> pennant_to_del;
+thread_local std::vector<bag_t*> bag_to_del;
+thread_local std::vector<node_t*> node_to_del;
+
+auto alloc_pennant() -> pennant_t*
 {
-  std ::cout << "[deleting pennant]" << std ::endl;
-  if (root != nullptr) {
-    clear_pennant(root->left);
-    delete root;
+  auto pennant = new pennant_t;
+  pennant_to_del.emplace_back(pennant);
+  return pennant;
+}
+
+auto alloc_pennant(int root) -> pennant_t*
+{
+  auto pennant = new pennant_t(root);
+  pennant_to_del.emplace_back(pennant);
+  return pennant;
+}
+
+auto alloc_bag(size_t size) -> bag_t*
+{
+  auto bag = new bag_t(size);
+  bag_to_del.emplace_back(bag);
+  return bag;
+}
+
+inline auto alloc_node() -> node_t*
+{
+  auto node = new node_t;
+  node_to_del.emplace_back(node);
+  return node;
+}
+
+auto clear_thread_data() -> void
+{
+  pennant_to_del.clear();
+  for (auto& pennant : pennant_to_del) {
+    delete pennant;
   }
+  // bag_to_del.clear();
+  for (auto& bag : bag_to_del) {
+    delete bag;
+  }
+  for (auto& node : node_to_del) {
+    delete node;
+  }
+  // pennant_to_del.clear();
+  // bag_to_del.clear();
+  // node_to_del.clear();
+}
+
+pennant_t ::pennant_t()
+    : root(nullptr)
+    , size(0)
+{
+}
+
+pennant_t ::pennant_t(int i)
+    : size {1}
+{
+  root = alloc_node();
+  root->data = i;
+  root->left = root->right = nullptr;
+}
+
+// pennant_t ::~pennant_t()
+// {
+//   // std::cout << "[~pennant_t]" << std::endl;
+//   // if (root != nullptr) {
+//   //   clear_pennant(root->left);
+//   //   delete root;
+//   // }
+// }
+
+auto pennant_t ::get_elements(node_t* node, std::vector<int>* elements) -> void
+{
+  if (node == nullptr) {
+    return;
+  }
+  elements->push_back(node->data);
+  get_elements(node->left, elements);
+  get_elements(node->right, elements);
+}
+
+/**
+ * @brief Merge two complete trees of size 2^k to a tree of size 2^(k+1)
+ *
+ * The resulting, merged, tree will be located in x
+ *
+ */
+auto pennant_t ::merge_pennant(pennant_t* x, pennant_t* y) -> void
+{
+  if (x == nullptr) {
+    x = y;
+    return;
+  }
+  if (y == nullptr) {
+    return;
+  }
+
+  y->root->right = x->root->left;
+  x->root->left = y->root;
+  x->size += y->size;
+
+  y->size = 0;
+  y->root = nullptr;
+  // delete y;  // TODO
+}
+/**
+ * @brief Split pennant to_split, taking the leaving the left subtree and
+ * moving the right to the remainder. to_split has to be a valid pointer with
+ * a root != nullptr
+ *
+ * @param to_split
+ * @param remainder an empty pennant that will be filled
+ */
+auto pennant_t ::split_pennant(pennant_t* to_split, pennant_t* remainder)
+    -> void
+{
+  assert(to_split != remainder);
+  assert(to_split != nullptr);
+  if (to_split->root->left == nullptr) {
+    return;
+  }
+  assert(to_split->root != nullptr);
+  node_t* lroot = to_split->root->left;
+  if (lroot != nullptr) {
+    remainder->root = lroot;
+    to_split->root->left = lroot->left;
+    lroot->left = lroot->right;
+    lroot->right = nullptr;
+
+    size_t new_size = to_split->size >> 1;
+    remainder->size = new_size;
+    to_split->size = new_size;
+  }
+}
+
+auto pennant_t ::get_elements(pennant_t* pennant, std::vector<int>* elements)
+    -> void
+{
+  if (pennant->root == nullptr) {
+    return;
+  }
+  elements->push_back(pennant->root->data);
+  get_elements(pennant->root->left, elements);
 }
 
 auto pennant_t ::clear_pennant(node_t* r) -> void
@@ -21,12 +164,18 @@ auto pennant_t ::clear_pennant(node_t* r) -> void
   }
   clear_pennant(r->left);
   clear_pennant(r->right);
-  delete r;
+  delete r;  // TODO
 }
 
+/**
+ * @brief Insert an element into bag
+ *
+ * @param bag
+ * @param i
+ */
 auto pennant_t ::insert(int i) -> void
 {
-  node_t* t = new node_t;
+  node_t* t = alloc_node();
   t->data = i;
   t->left = nullptr;
   t->right = nullptr;
@@ -118,16 +267,40 @@ auto pennant_t ::display_inorder(node_t* root, int depth) -> void
   display_inorder(root->left, depth + 1);
 }
 
-auto insert(bag_t* bag, int i) -> void
+bag_t ::bag_t(size_t vertices)
+    : size {static_cast<size_t>(log2(vertices) + 1)}
+    , number_of_elements(0)
 {
-  pennant_t* cbt = new pennant_t(i);
+  std::memset(arr, 0, size * sizeof(pennant_t*));
+}
+
+// bag_t ::~bag_t()
+// {
+//   {
+//     std::cout << "[~ bag called]" << std::endl;
+//     for (int i = 0; i < size; i++) {
+//       if (arr[i] != nullptr) {
+//         delete arr[i];  // TODO
+//       }
+//     }
+//   }
+// }
+
+auto bag_t ::insert(int i) -> void
+{
+  pennant_t* cbt = alloc_pennant(i);  // new pennant_t(i);  // TODO
   int k = 0;
-  while (bag->arr[k] != nullptr) {
-    pennant_t::merge_pennant(cbt, bag->arr[k]);
-    bag->arr[k++] = nullptr;
+  while (arr[k] != nullptr && k < size) {
+    pennant_t::merge_pennant(cbt, arr[k]);
+    arr[k++] = nullptr;
   }
-  bag->arr[k] = cbt;
-  bag->number_of_elements++;
+  arr[k] = cbt;
+  number_of_elements++;
+}
+
+auto bag_t ::get_size() -> size_t
+{
+  return size;
 }
 
 auto bag_t::empty() -> bool
@@ -135,105 +308,113 @@ auto bag_t::empty() -> bool
   return number_of_elements == 0;
 }
 
-auto insert_pennant(bag_t* bag, pennant_t* cbt) -> void
+/**
+ * @brief Insert a pennant into a bag. The pennat must only contain a single
+ * node
+ *
+ * @param pennant
+ */
+auto bag_t ::insert_pennant(pennant_t* cbt) -> void
 {
   int k = 0;
-  while (bag->arr[k] != nullptr) {
-    pennant_t::merge_pennant(cbt, bag->arr[k]);
-    bag->arr[k++] = nullptr;
+  while (arr[k] != nullptr) {
+    pennant_t::merge_pennant(cbt, arr[k]);
+    arr[k++] = nullptr;
   }
-  bag->arr[k] = cbt;
+  arr[k] = cbt;
 }
 
-auto merge(bag_t* b1, bag_t* b2) -> void
+/**
+ * @brief Merge the contents of bag into self
+ *
+ * @param b2
+ */
+auto bag_t::merge(bag_t* b2) -> void
 {
+  if (b2 == this)
+    return;
+
   // merge the contents of two bags
   pennant_t* carry = nullptr;
-  int r = b1->size, j;  // size should be equal for both bags
+  int r = size, j;  // size should be equal for both bags
   bool A, B, C;
   for (int i = 0; i < r; i++) {
-    A = b1->arr[i] != nullptr;
+    A = arr[i] != nullptr;
     B = b2->arr[i] != nullptr;
     C = carry != nullptr;
     j = (A * (1 << 2)) | (B * (1 << 1)) | (C * (1));
-    LOGF("j = %d\n", j);
     assert(j < 8 && j >= 0);
     switch (j) {
       case 0:
       /* FALL THROUGH */
       case 4:
-        LOGF("case 0 or 4, nothing\n");
         break;
       case 1:
-        b1->arr[i] = carry;
+        arr[i] = carry;
         carry = nullptr;
-        LOGF("case 1, swap(A, C)\n");
         break;
       case 2:
-        b1->arr[i] = b2->arr[i];
+        arr[i] = b2->arr[i];
         b2->arr[i] = nullptr;
-        LOGF("case 2, swap(A, B)\n");
         break;
       case 3:
         pennant_t::merge_pennant(carry, b2->arr[i]);
         b2->arr[i] = nullptr;
         assert(carry->size == (1 << (i + 1)));
-        LOGF("case 3, merge(C, B)\n");
         break;
       case 5:
-        pennant_t::merge_pennant(carry, b1->arr[i]);
-        b1->arr[i] = nullptr;
+        pennant_t::merge_pennant(carry, arr[i]);
+        arr[i] = nullptr;
         assert(carry->size == (1 << (i + 1)));
-        LOGF("case 5, merge(C, A)\n");
         break;
       case 6:
         /* FALL THROUGH */
       case 7:
-        pennant_t::merge_pennant(b1->arr[i], b2->arr[i]);
+        pennant_t::merge_pennant(arr[i], b2->arr[i]);
         b2->arr[i] = nullptr;
-        std::swap(b1->arr[i], carry);
-        LOGF("case 6 or 7, merge(A, B) and swap(A, C)\n");
+        std::swap(arr[i], carry);
         break;
       default:
         break;
     }
   }
   // This will need to be changed
-  b1->number_of_elements += b2->number_of_elements;
+  number_of_elements += b2->number_of_elements;
   b2->number_of_elements = 0;
 }
-
-auto create(bag_t* b1) -> void {}
-
-auto split(bag_t* current, bag_t* other) -> void
+/**
+ * @brief Split a bag into two disjoint bags. Some fraction of the items move
+ * to the other bag, and the rest of the items remain in the current bag
+ *
+ * @param other
+ */
+auto bag_t::split(bag_t* other) -> void
 {
   // split the current bag into two disjoint bags
   pennant_t* carry = nullptr;
   bool A, C;
-  int r = current->size - 1, j;
-  for (int i = current->size - 1; i >= 0; i--) {
-    A = current->arr[i] != nullptr;
+  int r = size - 1, j;
+  for (int i = size - 1; i >= 0; i--) {
+    A = arr[i] != nullptr;
     C = carry != nullptr;
     j = (A * (1 << 1)) | (C * 1);
     assert(j < 4 && j >= 0);
-    LOGF("j = %d, A = %d, C = %d\n", j, A, C);
     switch (j) {
       case 0:
-        LOGF("case 0, nothing\n");
         break;
       case 1:
         /* FALL THROUGH */
       case 3:
-        LOGF("case 1 or 3, split(C,B); swap(C, A)\n");
         assert(other->arr[i] == nullptr);
-        other->arr[i] = new pennant_t();
+        other->arr[i] = alloc_pennant();  // new pennant_t();  // TODO
         pennant_t::split_pennant(carry, other->arr[i]);
-        std::swap(current->arr[i], carry);
+        std::swap(arr[i], carry);
+        number_of_elements -= other->arr[i]->size;
+        other->number_of_elements += other->arr[i]->size;
         break;
       case 2:
-        LOGF("case 2, swap(A, C)\n");
-        carry = current->arr[i];
-        current->arr[i] = nullptr;
+        carry = arr[i];
+        arr[i] = nullptr;
         break;
       default:
         break;
@@ -241,22 +422,58 @@ auto split(bag_t* current, bag_t* other) -> void
   }
 
   if (carry != nullptr) {
-    insert_pennant(current, carry);
+    insert_pennant(carry);
   }
+  // number_of_elements = num_elements();
+  // other->number_of_elements = other->num_elements();
 }
 
+auto bag_t ::num_elements() -> size_t
+{
+  size_t count = 0;
+  for (int i = 0; i < size; i++) {
+    if (arr[i] != nullptr) {
+      count += 1 << i;
+    }
+  }
+  return count;
+}
+
+auto bag_t ::clear() -> void
+{
+  for (int i = 0; i < size; i++) {
+    if (arr[i] != nullptr) {
+      // delete arr[i];  // TODO
+      arr[i] = nullptr;
+    }
+  }
+  number_of_elements = 0;
+}
+
+auto create(bag_t* b1) -> void {}
 auto walk(bag_t* b) -> void {}
 
-auto display_bag_in_binary(bag_t* bag) -> void
+/**
+ * @brief Get a binary representation of the bag
+ * i.e. returns a string of 1's and 0's
+ * example of a bag with 19 elements:
+ *  \"bag:= 0b010011\"
+ *
+ *
+ */
+auto bag_t ::display_bag_in_binary() -> void
 {
   std::string out;
   out += "bag := 0b";
-  for (int i = bag->size - 1; i >= 0; i--) {
-    if (bag->arr[i] != nullptr) {
+  for (int i = size - 1; i >= 0; i--) {
+    if (arr[i] != nullptr) {
       out += "1";
     } else {
       out += "0";
     }
   }
-  std::cout << out << std::endl;
+  std::cout << out << " number of elements: " << number_of_elements
+            << std::endl;
 }
+
+/* ITERATOR IMPLEMENTATIONS */

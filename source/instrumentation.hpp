@@ -1,4 +1,5 @@
-#pragma once
+#ifndef INSTRUMENTATION
+#define INSTRUMENTATION
 
 #include <string>
 
@@ -170,3 +171,5 @@ void get_delta_time(struct timespec t1, struct timespec t2, struct timespec* td)
 #  define PRINT_BENCHMARK(name)
 
 #endif  // PERFORMANCE
+
+#endif  // INSTRUMENTATION

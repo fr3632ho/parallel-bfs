@@ -65,8 +65,8 @@ add_executable(parallel-bfs-test::exe ALIAS parallel-bfs-test_exe)
 
 set_property(TARGET parallel-bfs-test_exe PROPERTY OUTPUT_NAME bfs)
 
-target_compile_features(parallel-bfs-test_exe PRIVATE cxx_std_17)
 target_link_libraries(parallel-bfs-test_exe PRIVATE parallel-bfs-test)
+# target_compile_options(parallel-bfs-test_exe PRIVATE "-g -fsanitize=address")
 
 # ---- Install rules ----
 

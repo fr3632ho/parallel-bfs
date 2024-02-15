@@ -1,18 +1,27 @@
 #ifndef GRAPH_HPP
 #define GRAPH_HPP
-#pragma once
 
 /* Includes */
+#include <atomic>
 #include <iostream>
 #include <vector>
-
-#define VERIFY
 
 constexpr int EDGE_DEGREE = 256;
 constexpr int VERTEX_DEGREE = 256;
 constexpr int INF = 1 << 29;
+constexpr size_t vector_max_size = 1 << 19;
 
 typedef struct edge_t edge_t;
+
+struct edge_t
+{
+  int a, b;
+  edge_t(int a, int b)
+      : a {a}
+      , b {b}
+  {
+  }
+};
 
 class Graph
 {
@@ -25,13 +34,18 @@ public:
     adj.resize(static_cast<size_t>(vertices));
   }
 
+  Graph(int m_start,
+        int vertices,
+        int number_of_edges,
+        std::vector<edge_t> edges);
+
   /**
    * @brief Connect two nodes
    *
    * @param a
    * @param b
    */
-  auto connect(int a, int b) -> void;
+  auto connect(const int a, const int b) -> void;
 
   /**
    * @brief  Linear BFS implementation using unordered_set and deque
@@ -41,7 +55,7 @@ public:
   auto BFS_linear() -> int;
   auto BFS_openmp() -> int;
   auto BFS_bag_linear() -> int;
-  auto BFS_bag() -> int;
+  auto BFS_bag(const size_t number_of_threads) -> int;
 
   /**
    * @brief Check if the parallel BFS implementation is correct
@@ -52,12 +66,12 @@ public:
   friend auto operator<<(std::ostream& os, const Graph& graph) -> std::ostream&;
 
   int V, E;
-
-private:
-  std::vector<std::vector<int>> adj;
-  int start, v, m;
   std::vector<int> dist_linear;
   std::vector<int> dist_comp;
+  std::vector<std::vector<int>> adj;
+
+private:
+  int start, v, m;
 };
 
 auto build_graph(Graph& graph) -> void;
